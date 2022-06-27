@@ -137,14 +137,13 @@ const Home: NextPage = () => {
                                 solidityProof = Semaphore.packToSolidityProof(fullProof.proof)
     
                                 console.log(solidityProof)
-
-                                try {
-                                    const recoveryInstance: any = new Contract(
-                                        walletAddress.toString(),
-                                        RecoveryFacetAbi.abi,
-                                        signer
-                                    );
-
+                                const recoveryInstance: any = new Contract(
+                                    walletAddress.toString(),
+                                    RecoveryFacetAbi.abi,
+                                    signer
+                                );
+                                
+                                try {                    
                                     const tx = await recoveryInstance.recover(
                                         groupId,
                                         utils.formatBytes32String(greeting),
@@ -243,10 +242,6 @@ const Home: NextPage = () => {
                         <Button variant="contained" className={styles.button} type="button" onClick={() => reset()} >Reset Form</Button>
                     </div>
                 </form>
-                <div style={{ marginTop: "5em" }}>
-                    <div className={styles.logs}>Your Onchain data:</div>
-                    {/* <TextBox value={greeting} /> */}
-                </div>
             </main>
             <footer className={styles.footer}>
                 <Link color="#FFFFFF"
