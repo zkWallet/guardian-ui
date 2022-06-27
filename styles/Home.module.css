@@ -67,11 +67,11 @@
     border-top: 1px solid #eaeaea;
     justify-content: center;
     align-items: center;
-  }
+}
   
-  .footer a {
+.footer a {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-grow: 1;
-  }
+}
