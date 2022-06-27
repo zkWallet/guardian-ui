@@ -2,7 +2,7 @@ import detectEthereumProvider from "@metamask/detect-provider"
 import { Strategy, ZkIdentity } from "@zk-kit/identity"
 import { providers} from "ethers"
 import type { NextPage } from "next"
-import React, { useState } from "react"
+import React from "react"
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -67,8 +67,8 @@ const Home: NextPage = () => {
 
   const formOptions = { resolver: yupResolver(validationSchema)};
 
-  const { handleSubmit, register, reset, formState } = useForm<GuardianInput>(formOptions)
-  const { errors } = formState;
+  const { handleSubmit, register } = useForm<GuardianInput>(formOptions)
+  // const { errors } = formState;
 
   const onSubmitHandler = (guardian: GuardianInput) => {
     greet(guardian)
