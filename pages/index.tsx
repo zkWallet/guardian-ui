@@ -3,17 +3,17 @@ import { Strategy, ZkIdentity } from "@zk-kit/identity"
 import { generateMerkleProof, Semaphore, SemaphoreFullProof, SemaphoreSolidityProof } from "@zk-kit/protocols"
 import { providers, Contract, constants, utils, BigNumber } from "ethers"
 import type { NextPage } from 'next'
-import Head from "next/head"
-import React, { useState, useEffect } from "react"
+// import Head from "next/head"
+import React, { useState } from "react"
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { AppBar, Button, Typography, Toolbar, Link } from "@mui/material";
 import styles from "../styles/Home.module.css"
-import TextBox from "./component/TextBox"; 
+// import TextBox from "./component/TextBox"; 
 import GuardianFacetAbi from "../contracts/facets/GuardianFacet.sol/GuardianFacet.json";
 import RecoveryFacetAbi from "../contracts/facets/RecoveryFacet.sol/RecoveryFacet.json";
-import { GuardianFacet, RecoveryFacet } from "../typechain-types"
+// import { GuardianFacet, RecoveryFacet } from "../typechain-types"
 
 
 type UserInput = {
@@ -79,6 +79,9 @@ const Home: NextPage = () => {
 
             console.log("identityCommitment: ", identityCommitment)
 
+            console.log(event)
+            console.log(greeting)
+
             let identityCommitments: string[] = [];
             let identityCommitmentsBigInt: BigInt[] = [];
             let merkleProof: any;
@@ -87,7 +90,7 @@ const Home: NextPage = () => {
 
             const walletAddress = userInput.walletAddress
             const newOwnerAddress = userInput.newOwnerAddress
-            const contract: any | GuardianFacet = new Contract(
+            const contract: any  = new Contract(
                 walletAddress.toString(),
                 GuardianFacetAbi.abi,
                 signer
@@ -120,6 +123,7 @@ const Home: NextPage = () => {
                                 setLogs("Creating your Semaphore proof...")
     
                                 const greeting = userInput.greet
+                                setGreeting(greeting)
     
                                 const witness = Semaphore.genWitness(
                                     identity.getTrapdoor(),
@@ -135,7 +139,7 @@ const Home: NextPage = () => {
                                 console.log(solidityProof)
 
                                 try {
-                                    const recoveryInstance: any | RecoveryFacet = new Contract(
+                                    const recoveryInstance: any = new Contract(
                                         walletAddress.toString(),
                                         RecoveryFacetAbi.abi,
                                         signer
@@ -199,11 +203,7 @@ const Home: NextPage = () => {
                     </div>
                 </Toolbar>
             </AppBar>
-            <Head>
-                <title>Greetings</title>
-                <meta name="description" content="dApp zkWallet guardian recovery." />
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
+
 
             <main className={styles.main}>
                 <h1 className={styles.title}>Guardian Recovery</h1>
@@ -220,7 +220,7 @@ const Home: NextPage = () => {
                                 {...register("walletAddress")} 
                                 className={`form-control ${errors.walletAddress ? 'is-invalid' : ''}`}
                         />
-                        <div className={styles.invalid}>{errors.name?.message}</div>
+                        <div className={styles.invalid}>{errors.walletAddress?.message}</div>
                     </div>
                     <input  type="text"
                             placeholder="New owner address"
@@ -235,9 +235,8 @@ const Home: NextPage = () => {
                             color="primary"
                             className={`form-control ${errors.greet ? 'is-invalid' : ''}`}
                     />
-                    <div className={styles.invalid}>{errors.name?.message}</div>
-                    <div className={styles.invalid}>{errors.address?.message}</div>
-                    <div className={styles.invalid}>{errors.age?.message}</div>
+                    <div className={styles.invalid}>{errors.walletAddress?.message}</div>
+                    <div className={styles.invalid}>{errors.newOwnerAddress?.message}</div>
                     <div className={styles.invalid}>{errors.greet?.message}</div>
                     <div className="form-group">
                         <Button variant="contained" className={styles.button} type="submit" >Sign Identity</Button>
@@ -246,12 +245,7 @@ const Home: NextPage = () => {
                 </form>
                 <div style={{ marginTop: "5em" }}>
                     <div className={styles.logs}>Your Onchain data:</div>
-                    <TextBox value={greeting} />
-                </div>
-                <div style={{ marginTop: "5em" }}>
-                    <div className={styles.logs}>Events Onchain data:</div>
-    
-                    <TextBox value={event} />
+                    {/* <TextBox value={greeting} /> */}
                 </div>
             </main>
         </div>
