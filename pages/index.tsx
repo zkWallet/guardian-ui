@@ -214,7 +214,7 @@ const Home: NextPage = () => {
                 <form onSubmit={handleSubmit(onSubmitHandler)}>
                     <div className="form-group">
                         <input  type="text"
-                                placeholder="User wallet address"
+                                placeholder="User wallet address to recover"
                                 id="walletAddress"
                                 {...register("walletAddress")} 
                                 className={`form-control ${errors.walletAddress ? 'is-invalid' : ''}`}
