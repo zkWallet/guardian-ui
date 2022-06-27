@@ -4,13 +4,13 @@ import { generateMerkleProof, Semaphore, SemaphoreFullProof, SemaphoreSolidityPr
 import { providers, Contract, constants, utils, BigNumber } from "ethers"
 import type { NextPage } from 'next'
 import Head from "next/head"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { AppBar, Button, Typography, Toolbar, Link } from "@mui/material";
 import styles from "../styles/Home.module.css"
-// import TextBox from "./component/TextBox"; 
+import TextBox from "./component/TextBox"; 
 import GuardianFacetAbi from "../contracts/facets/GuardianFacet.sol/GuardianFacet.json";
 import RecoveryFacetAbi from "../contracts/facets/RecoveryFacet.sol/RecoveryFacet.json";
 import { GuardianFacet, RecoveryFacet } from "../typechain-types"
@@ -20,30 +20,12 @@ type UserInput = {
     walletAddress: string
     newOwnerAddress: string,
     greet: string
-  }
+}
 
 const Home: NextPage = () => {
     const [logs, setLogs] = React.useState("Connect your wallet to recover!")
-
-    // useEffect(() => {
-    //     const newGreeting = async () => {
-    //       const provider = (await detectEthereumProvider()) as any;
-    //       const ethersProvider = new providers.Web3Provider(provider);
-    
-    //       const contract = new Contract(
-    //         "0xf4AE7E15B1012edceD8103510eeB560a9343AFd3",
-    //         Greeter.abi,
-    //         ethersProvider
-    //       );
-    
-    //       contract.on("NewGreeting", (greeting: string) => {
-    //         setGreetingEvents(prevState => [...prevState, utils.parseBytes32String(greeting)]);
-    //       });
-    //     };
-    
-    //     newGreeting().catch(console.error);
-    // }, []);
-    
+    const [event, setEvents] = useState<string>()
+    const [greeting, setGreeting] = useState<string>()
 
     // form validation rules 
     const validationSchema = Yup.object().shape({
@@ -170,6 +152,13 @@ const Home: NextPage = () => {
  
                                     const receipt = await tx.wait();
                                     console.log(receipt);
+                                    if (receipt.events.length > 0) {
+                                        setEvents(JSON.stringify(receipt.events))
+                                        console.log(receipt.events)
+                                        const resultGreeting = receipt.events[0].args.greeting;
+                                        setGreeting(resultGreeting);
+                                        console.log(utils.parseBytes32String(resultGreeting));
+                                    }
                                 } catch (recoverError) {
                                     setLogs("Error occured while recovering the wallet!")
                                     console.log("recoverError", recoverError);
@@ -257,14 +246,12 @@ const Home: NextPage = () => {
                 </form>
                 <div style={{ marginTop: "5em" }}>
                     <div className={styles.logs}>Your Onchain data:</div>
-                    {/* <TextBox value={greeting} /> */}
+                    <TextBox value={greeting} />
                 </div>
                 <div style={{ marginTop: "5em" }}>
-                    <div className={styles.logs}>Others Onchain data:</div>
-                    {/* {greetingEvents.map((greetingEvents) => {
-                        return <TextBox value={greetingEvents} />
-                    })} */}
-                    {/* <TextBox value={greetingEvents} /> */}
+                    <div className={styles.logs}>Events Onchain data:</div>
+    
+                    <TextBox value={event} />
                 </div>
             </main>
         </div>
