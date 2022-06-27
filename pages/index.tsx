@@ -3,6 +3,7 @@ import { Strategy, ZkIdentity } from "@zk-kit/identity"
 import { generateMerkleProof, Semaphore, SemaphoreFullProof, SemaphoreSolidityProof } from "@zk-kit/protocols"
 import { providers, Contract, constants, utils, BigNumber } from "ethers"
 import type { NextPage } from 'next'
+import Image from 'next/image'
 // import Head from "next/head"
 import React, { useState } from "react"
 import { useForm } from 'react-hook-form';
@@ -247,6 +248,19 @@ const Home: NextPage = () => {
                     {/* <TextBox value={greeting} /> */}
                 </div>
             </main>
+            <footer className={styles.footer}>
+                <a
+                href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
+                target="_blank"
+                rel="noopener noreferrer"
+                >
+                Powered by{' '}
+                <span className={styles.logo}>
+                    <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
+                </span>
+                </a>
+                <Link href="https://github.com/zkWallet/zkWallet-docs">Github documentation</Link>
+            </footer>
         </div>
     )
 }
