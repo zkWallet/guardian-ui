@@ -2,3 +2,4 @@ node_modules
 artifacts
 cache
 coverage
+_app.tsx
