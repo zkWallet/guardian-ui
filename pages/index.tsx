@@ -41,7 +41,6 @@ const Home: NextPage = () => {
     const formOptions = { 
         resolver: yupResolver(validationSchema),
         defaultValues: {
-            walletAddress: "0x64C2Fbc31afE74BAEcAe92Bb28D33bce6B454C0B",
             greet: "Hello World!",
         }
     };
