@@ -4,17 +4,14 @@ import { generateMerkleProof, Semaphore, SemaphoreFullProof, SemaphoreSolidityPr
 import { providers, Contract, constants, utils, BigNumber } from "ethers"
 import type { NextPage } from 'next'
 import Image from 'next/image'
-// import Head from "next/head"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { AppBar, Button, Typography, Toolbar, Link } from "@mui/material";
 import styles from "../styles/Home.module.css"
-// import TextBox from "./component/TextBox"; 
 import GuardianFacetAbi from "../contracts/facets/GuardianFacet.sol/GuardianFacet.json";
 import RecoveryFacetAbi from "../contracts/facets/RecoveryFacet.sol/RecoveryFacet.json";
-// import { GuardianFacet, RecoveryFacet } from "../typechain-types"
 
 
 type UserInput = {
@@ -27,6 +24,41 @@ const Home: NextPage = () => {
     const [logs, setLogs] = React.useState("Connect your wallet to recover!")
     const [event, setEvents] = useState<string>()
     const [greeting, setGreeting] = useState<string>()
+    const [connection, setConnection] = useState("");
+    const [provider, setProvider] = useState<any>()
+    const [signer, setSigner] = useState<providers.JsonRpcSigner>()
+    const [signerAddress, setSignerAddress] = useState<string>("")
+
+    useEffect(() => {
+        const fetchProvider = async () => {
+          const provider =  (await detectEthereumProvider()) as any;
+    
+          if (provider.chainId === "0x635ae020") {
+            setConnection("You are connected to  Harmony Devnet.")
+          } else if (provider.chainId === "0x89") {
+            setConnection("You are connected to  Polygon Mainnet.")
+          } else {
+            setConnection("Please connect to Polygon Mainnet or Harmony Devnet!")
+          }
+    
+          await provider.request({ method: "eth_requestAccounts" })
+          setProvider(provider)
+    
+          const ethersProvider = new providers.Web3Provider(provider)
+          const signerData = ethersProvider.getSigner()
+          setSigner(signerData)
+          const signerAddress: string = await signerData.getAddress() as string
+          setSignerAddress(signerAddress)
+    
+        }
+      
+        // call the function
+        fetchProvider()
+          // make sure to catch any error
+          .catch(console.error);
+
+    
+      }, [signer, setSigner, setSignerAddress, setProvider]);
 
     // form validation rules 
     const validationSchema = Yup.object().shape({
@@ -58,128 +90,116 @@ const Home: NextPage = () => {
     async function recover(userInput: UserInput) {
         setLogs("Creating your Semaphore identity...")
 
-        const provider = (await detectEthereumProvider()) as any
-
-        if (provider.chainId === "0x635ae020") {
-            setLogs("You are connected to  Harmony One Devnet...")
-
-            const groupId: BigNumber = constants.One;
-
-            let fullProof: SemaphoreFullProof;
-            let solidityProof: SemaphoreSolidityProof;
-
-            await provider.request({ method: "eth_requestAccounts" })
-
-            const ethersProvider = new providers.Web3Provider(provider)
-            const signer = ethersProvider.getSigner()
-            const message = await signer.signMessage("Sign this message to create your identity!")
-
-            const identity = new ZkIdentity(Strategy.MESSAGE, message)
-            const identityCommitment = identity.genIdentityCommitment()
-
-            console.log("identityCommitment: ", identityCommitment)
-
-            console.log(event)
-            console.log(greeting)
-
-            let identityCommitments: string[] = [];
-            let identityCommitmentsBigInt: BigInt[] = [];
-            let merkleProof: any;
-            let guardians: any[] = [];
-            let version: string;
-
-            const walletAddress = userInput.walletAddress
-            const newOwnerAddress = userInput.newOwnerAddress
-            const contract: any  = new Contract(
-                walletAddress.toString(),
-                GuardianFacetAbi.abi,
-                signer
-            );
         
-            //check if contract is callable
-            try {
-                version = await contract.guardianFacetVersion()
-                console.log("guardianFacetVersion: ", version)
-                if (version === "0.0.1") {
-                    setLogs("Your Semaphore identity is being created...")
+
+        const groupId: BigNumber = constants.One;
+
+        let fullProof: SemaphoreFullProof;
+        let solidityProof: SemaphoreSolidityProof;
+
+        const message = await signer.signMessage("Sign this message to create your identity!")
+
+        const identity = new ZkIdentity(Strategy.MESSAGE, message)
+        const identityCommitment = identity.genIdentityCommitment()
+
+        console.log("identityCommitment: ", identityCommitment)
+
+        let identityCommitments: string[] = [];
+        let identityCommitmentsBigInt: BigInt[] = [];
+        let merkleProof: any;
+        let guardians: any[] = [];
+        let version: string;
+
+        const walletAddress = userInput.walletAddress
+        const newOwnerAddress = userInput.newOwnerAddress
+        const contract: any  = new Contract(
+            walletAddress.toString(),
+            GuardianFacetAbi.abi,
+            signer
+        );
     
-                    try {
-                        guardians = await contract.getGuardians(1);
-                        console.log("guardians", guardians);
-                        if (guardians.length > 0) {           
-                            for (let i = 0; i < guardians.length; i++) {
-                            identityCommitments.push((guardians[i].hashId).toString());
-                            identityCommitmentsBigInt.push(BigInt(guardians[i].hashId));
-                            }
-    
-                            console.log(identityCommitments);
-                            console.log("identityCommitmentsBigInt", identityCommitmentsBigInt);
-    
-                            try {
-                                merkleProof = generateMerkleProof(20, BigInt(0), identityCommitments, identityCommitment)
-    
-                                console.log("merkleProof", merkleProof);
-    
-                                setLogs("Creating your Semaphore proof...")
-    
-                                const greeting = userInput.greet
-                                setGreeting(greeting)
-    
-                                const witness = Semaphore.genWitness(
-                                    identity.getTrapdoor(),
-                                    identity.getNullifier(),
-                                    merkleProof,
-                                    merkleProof.root,
-                                    greeting
-                                )
-    
-                                fullProof = await Semaphore.genProof(witness, "./semaphore.wasm", "./semaphore_final.zkey")
-                                solidityProof = Semaphore.packToSolidityProof(fullProof.proof)
-    
-                                console.log(solidityProof)
-                                const recoveryInstance: any = new Contract(
-                                    walletAddress.toString(),
-                                    RecoveryFacetAbi.abi,
-                                    signer
-                                );
-                                
-                                try {                    
-                                    const tx = await recoveryInstance.recover(
-                                        groupId,
-                                        utils.formatBytes32String(greeting),
-                                        fullProof.publicSignals.nullifierHash,
-                                        fullProof.publicSignals.externalNullifier,
-                                        solidityProof,
-                                        newOwnerAddress,
-                                    )
- 
-                                    const receipt = await tx.wait();
-                                    console.log(receipt);
-                                    setLogs("Recovery successful!")
-                                } catch (recoverError) {
-                                    setLogs("Error occured while recovering the wallet!")
-                                    console.log("recoverError", recoverError);
-                                }
-                            } catch (error) {
-                                setLogs("You are not a guardian of this wallet!")
-                                console.log("error", error)
-                            }
-                        } else {
-                            setLogs(`No guardians available for User wallet: ${walletAddress}`)
+        //check if contract is callable
+        try {
+            version = await contract.guardianFacetVersion()
+            console.log("guardianFacetVersion: ", version)
+            if (version === "0.1.0.alpha") {
+                setLogs("Your Semaphore identity is being created...")
+
+                try {
+                    guardians = await contract.getGuardians(1);
+                    console.log("guardians", guardians);
+                    if (guardians.length > 0) {           
+                        for (let i = 0; i < guardians.length; i++) {
+                        identityCommitments.push((guardians[i].hashId).toString());
+                        identityCommitmentsBigInt.push(BigInt(guardians[i].hashId));
                         }
-                    } catch (guardianError) {
-                        setLogs(`guardianError ${guardianError}`)
+
+                        console.log(identityCommitments);
+                        console.log("identityCommitmentsBigInt", identityCommitmentsBigInt);
+
+                        try {
+                            merkleProof = generateMerkleProof(20, BigInt(0), identityCommitments, identityCommitment)
+
+                            console.log("merkleProof", merkleProof);
+
+                            setLogs("Creating your Semaphore proof...")
+
+                            const greeting = userInput.greet
+                            setGreeting(greeting)
+
+                            const witness = Semaphore.genWitness(
+                                identity.getTrapdoor(),
+                                identity.getNullifier(),
+                                merkleProof,
+                                merkleProof.root,
+                                greeting
+                            )
+
+                            fullProof = await Semaphore.genProof(witness, "./semaphore.wasm", "./semaphore_final.zkey")
+                            solidityProof = Semaphore.packToSolidityProof(fullProof.proof)
+
+                            console.log(solidityProof)
+                            const recoveryInstance: any = new Contract(
+                                walletAddress.toString(),
+                                RecoveryFacetAbi.abi,
+                                signer
+                            );
+                            
+                            try {                    
+                                const tx = await recoveryInstance.recover(
+                                    groupId,
+                                    utils.formatBytes32String(greeting),
+                                    fullProof.publicSignals.nullifierHash,
+                                    fullProof.publicSignals.externalNullifier,
+                                    solidityProof,
+                                    newOwnerAddress,
+                                )
+
+                                const receipt = await tx.wait();
+                                console.log(receipt);
+                                setLogs("Recovery successful!")
+                            } catch (recoverError) {
+                                setLogs("Error occured while recovering the wallet!")
+                                console.log("recoverError", recoverError);
+                            }
+                        } catch (error) {
+                            setLogs("You are not a guardian of this wallet!")
+                            console.log("error", error)
+                        }
+                    } else {
+                        setLogs(`No guardians available for User wallet: ${walletAddress}`)
                     }
-                } else {
-                    setLogs(`User wallet: ${walletAddress}  is not callable`)
+                } catch (guardianError) {
+                    setLogs(`guardianError ${guardianError}`)
                 }
-            } catch (contractError) {
-                setLogs(`Non a GuardianFacet contract`)
-                console.log("contractError", contractError)
+            } else {
+                setLogs(`User wallet: ${walletAddress}  is not callable`)
             }
-        }  else {
-            setLogs("Please change your network to Harmony One Devnet...")
+        } catch (contractError) {
+            setLogs(`Non a GuardianFacet contract`)
+            console.log("contractError", contractError)
         }
+
     }
 
     return (
