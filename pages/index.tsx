@@ -155,13 +155,7 @@ const Home: NextPage = () => {
  
                                     const receipt = await tx.wait();
                                     console.log(receipt);
-                                    if (receipt.events.length > 0) {
-                                        setEvents(JSON.stringify(receipt.events))
-                                        console.log(receipt.events)
-                                        const resultGreeting = receipt.events[0].args.greeting;
-                                        setGreeting(resultGreeting);
-                                        console.log(utils.parseBytes32String(resultGreeting));
-                                    }
+                                    setLogs("Recovery successful!")
                                 } catch (recoverError) {
                                     setLogs("Error occured while recovering the wallet!")
                                     console.log("recoverError", recoverError);
