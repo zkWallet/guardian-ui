@@ -13,7 +13,6 @@ export default async function handler(
       password: process.env.DAPP_PASSWORD as string,
     }
     const url = `${process.env.GUARDIAN_SERVICE}${process.env.AUTH_LOGIN_URI}`
-    console.log('url', url)
     // get token
     const response = await fetch(url, {
       body: JSON.stringify(body),
@@ -29,7 +28,6 @@ export default async function handler(
     if (token.access_token) {
       const access_token: any = token.access_token
       const GUARDIAN_URL = `${process.env.GUARDIAN_SERVICE}${process.env.GUARDIANS_URI}`
-      console.log('GUARDIAN_URL', GUARDIAN_URL)
 
       const postGuardians = await fetch(GUARDIAN_URL, {
         body: JSON.stringify(req.body),

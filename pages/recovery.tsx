@@ -210,11 +210,10 @@ const Home: NextPage = () => {
     }
 
     if (!provider) {
-        return <div>Looding..</div>
-    } else {
       console.log(connection)
-    }
-
+        return <div>Looding..</div>
+    } 
+  
     return (
         <div className={styles.container}>
 
