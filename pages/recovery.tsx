@@ -28,6 +28,8 @@ const Home: NextPage = () => {
     const [signer, setSigner] = useState<providers.JsonRpcSigner>()
     const [signerAddress, setSignerAddress] = useState<string>("")
 
+    console.log(greeting)
+
     useEffect(() => {
       const fetchProvider = async () => {
         const provider =  (await detectEthereumProvider()) as any
@@ -90,7 +92,6 @@ const Home: NextPage = () => {
     const onSubmitHandler = (userInput: UserInput) => {
         recover(userInput)
     }
-
 
     async function recover(userInput: UserInput) {
       setLogs("Creating your Semaphore identity...")
