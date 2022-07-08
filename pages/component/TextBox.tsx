@@ -1,15 +1,15 @@
-import { Box, TextField } from "@mui/material";
-import React from "react";
+import { Box, TextField } from '@mui/material'
+import React from 'react'
 
 export interface CustomTextBoxProp {
-  value: string;
+  value: string
 }
 
 const TextBox = (prop: CustomTextBoxProp) => {
   return (
     <Box>
       <TextField
-        id="multiline"
+        id='multiline'
         multiline
         rows={10}
         disabled
@@ -17,22 +17,22 @@ const TextBox = (prop: CustomTextBoxProp) => {
         sx={{
           width: 500,
           height: 300,
-          "& .MuiInputBase-input.Mui-disabled": {
-            WebkitTextFillColor: "white",
+          '& .MuiInputBase-input.Mui-disabled': {
+            WebkitTextFillColor: 'white',
           },
-          "& .MuiOutlinedInput-root.Mui-disabled": {
-            "& fieldset": {
-              borderWidth: "10px",
-              borderColor: "red",
+          '& .MuiOutlinedInput-root.Mui-disabled': {
+            '& fieldset': {
+              borderWidth: '10px',
+              borderColor: 'red',
             },
-            "&:hover fieldset": {
-              borderColor: "yellow",
+            '&:hover fieldset': {
+              borderColor: 'yellow',
             },
           },
         }}
       />
     </Box>
-  );
-};
+  )
+}
 
-export default TextBox;
+export default TextBox

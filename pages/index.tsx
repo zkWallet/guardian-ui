@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
-import {Avatar, Button, Box, CssBaseline, Container, TextField, Grid, Typography} from '@mui/material'
+import { Avatar, Button, Box, CssBaseline, Container, TextField, Grid, Typography } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 
@@ -32,16 +32,16 @@ type GuardianInput = {
 const Home: NextPage = () => {
   const [logs, setLogs] = React.useState('Connect your wallet and register!')
   const [registered, setRegistered] = useState(false)
-  const [redirctTo, setRedirctTo] = useState(false); 
+  const [redirctTo, setRedirctTo] = useState(false)
 
   
   useEffect(() => {
     (() => {
       if (registered) {
         setRedirctTo(true)
-        const { pathname } = Router;
+        const { pathname } = Router
         if (pathname === '/') {
-          Router.push('/recovery');
+          Router.push('/recovery')
           console.log(redirctTo)
         }
       }
