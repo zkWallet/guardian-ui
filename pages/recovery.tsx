@@ -208,8 +208,6 @@ const Home: NextPage = () => {
     }
 
     if (!provider) {
-      console.log(connection)
-      console.log(greeting)
       return <div>Looding..</div>
     } 
   
@@ -267,6 +265,7 @@ const Home: NextPage = () => {
                     </span>
                 </Link>
                 <Link color="#FFFFFF" href="https://github.com/zkWallet/zkWallet-docs">Github documentation</Link>
+                <div hidden>{connection} {greeting}</div>
             </footer>
         </div>
     )
