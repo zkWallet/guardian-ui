@@ -5,13 +5,13 @@ import { providers, Contract, constants, utils, BigNumber } from "ethers"
 import type { NextPage } from 'next'
 import Image from 'next/image'
 import React, { useState, useEffect } from "react"
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
-import { AppBar, Button, Typography, Toolbar, Link } from "@mui/material";
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as Yup from 'yup'
+import { Button, Link } from "@mui/material"
 import styles from "../styles/Home.module.css"
-import GuardianFacetAbi from "../contracts/facets/GuardianFacet.sol/GuardianFacet.json";
-import RecoveryFacetAbi from "../contracts/facets/RecoveryFacet.sol/RecoveryFacet.json";
+import GuardianFacetAbi from "../contracts/facets/GuardianFacet.sol/GuardianFacet.json"
+import RecoveryFacetAbi from "../contracts/facets/RecoveryFacet.sol/RecoveryFacet.json"
 
 
 type UserInput = {
@@ -22,16 +22,15 @@ type UserInput = {
 
 const Home: NextPage = () => {
     const [logs, setLogs] = React.useState("Connect your wallet to recover!")
-    const [event, setEvents] = useState<string>()
     const [greeting, setGreeting] = useState<string>()
-    const [connection, setConnection] = useState("");
+    const [connection, setConnection] = useState("")
     const [provider, setProvider] = useState<any>()
     const [signer, setSigner] = useState<providers.JsonRpcSigner>()
     const [signerAddress, setSignerAddress] = useState<string>("")
 
     useEffect(() => {
       const fetchProvider = async () => {
-        const provider =  (await detectEthereumProvider()) as any;
+        const provider =  (await detectEthereumProvider()) as any
         setProvider(provider)
 
         if (provider.chainId === '0x635ae020') {
@@ -55,15 +54,16 @@ const Home: NextPage = () => {
         setSigner(signerData)
         const newSignerAddress: string = await signerData.getAddress() as string
         setSignerAddress(newSignerAddress)
+        console.log('signerAddress: ', signerAddress)
       }
       
       // call the function
       fetchProvider()
         // make sure to catch any error
-        .catch(console.error);
+        .catch(console.error)
 
     
-      }, [signer]);
+      }, [signer])
 
     // form validation rules 
     const validationSchema = Yup.object().shape({
@@ -74,17 +74,17 @@ const Home: NextPage = () => {
       greet: Yup.string()
           .required('Greeting is required')  
           .max(32, 'Greeting must be less than 32 characters')
-    });
+    })
 
     const formOptions = { 
       resolver: yupResolver(validationSchema),
       defaultValues: {
           greet: "Hello World!",
       }
-    };
+    }
     // get functions to build form with useForm() hook
     const { register, handleSubmit, reset, formState } = useForm<UserInput>(formOptions)
-    const { errors } = formState;
+    const { errors } = formState
 
 
     const onSubmitHandler = (userInput: UserInput) => {
@@ -95,10 +95,10 @@ const Home: NextPage = () => {
     async function recover(userInput: UserInput) {
       setLogs("Creating your Semaphore identity...")
 
-      const groupId: BigNumber = constants.One;
+      const groupId: BigNumber = constants.One
 
-      let fullProof: SemaphoreFullProof;
-      let solidityProof: SemaphoreSolidityProof;
+      let fullProof: SemaphoreFullProof
+      let solidityProof: SemaphoreSolidityProof
 
       const message = await signer.signMessage("Sign this message to create your identity!")
 
@@ -107,11 +107,11 @@ const Home: NextPage = () => {
 
       console.log("identityCommitment: ", identityCommitment)
 
-      let identityCommitments: string[] = [];
-      let identityCommitmentsBigInt: BigInt[] = [];
-      let merkleProof: any;
-      let guardians: any[] = [];
-      let version: string;
+      let identityCommitments: string[] = []
+      let identityCommitmentsBigInt: BigInt[] = []
+      let merkleProof: any
+      let guardians: any[] = []
+      let version: string
 
       const walletAddress = userInput.walletAddress
       const newOwnerAddress = userInput.newOwnerAddress
@@ -119,7 +119,7 @@ const Home: NextPage = () => {
           walletAddress.toString(),
           GuardianFacetAbi.abi,
           signer
-      );
+      )
   
       //check if contract is callable
       try {
@@ -129,21 +129,21 @@ const Home: NextPage = () => {
           setLogs("Your Semaphore identity is being created...")
 
           try {
-              guardians = await contract.getGuardians(1);
-              console.log("guardians", guardians);
+              guardians = await contract.getGuardians(1)
+              console.log("guardians", guardians)
               if (guardians.length > 0) {           
                 for (let i = 0; i < guardians.length; i++) {
-                identityCommitments.push((guardians[i].hashId).toString());
-                identityCommitmentsBigInt.push(BigInt(guardians[i].hashId));
+                identityCommitments.push((guardians[i].hashId).toString())
+                identityCommitmentsBigInt.push(BigInt(guardians[i].hashId))
                 }
 
-                console.log(identityCommitments);
-                console.log("identityCommitmentsBigInt", identityCommitmentsBigInt);
+                console.log(identityCommitments)
+                console.log("identityCommitmentsBigInt", identityCommitmentsBigInt)
 
                 try {
                   merkleProof = generateMerkleProof(20, BigInt(0), identityCommitments, identityCommitment)
 
-                  console.log("merkleProof", merkleProof);
+                  console.log("merkleProof", merkleProof)
 
                   setLogs("Creating your Semaphore proof...")
 
@@ -166,7 +166,7 @@ const Home: NextPage = () => {
                     walletAddress.toString(),
                     RecoveryFacetAbi.abi,
                     signer
-                  );
+                  )
                   
                   try {                    
                     const tx = await recoveryInstance.recover(
@@ -178,12 +178,12 @@ const Home: NextPage = () => {
                         newOwnerAddress,
                     )
 
-                    const receipt = await tx.wait();
-                    console.log(receipt);
+                    const receipt = await tx.wait()
+                    console.log(receipt)
                     setLogs("Recovery successful!")
                   } catch (recoverError) {
                       setLogs("Error occured while recovering the wallet!")
-                      console.log("recoverError", recoverError);
+                      console.log("recoverError", recoverError)
                   }
                 } catch (error) {
                     setLogs("You are not a guardian of this wallet!")
@@ -206,6 +206,8 @@ const Home: NextPage = () => {
 
     if (!provider) {
         return <div>Looding..</div>
+    } else {
+      console.log(connection)
     }
 
     return (
