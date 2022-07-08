@@ -141,7 +141,7 @@ const Home: NextPage = () => {
         if (data) {
           console.log('data', data)
           console.log(response.status)
-          if (status === 200) {
+          if (response.status === 200) {
             setRegistered(true)
           }
         }
