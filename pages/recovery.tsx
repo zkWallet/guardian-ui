@@ -28,8 +28,6 @@ const Home: NextPage = () => {
     const [signer, setSigner] = useState<providers.JsonRpcSigner>()
     const [signerAddress, setSignerAddress] = useState<string>("")
 
-    console.log(greeting)
-
     useEffect(() => {
       const fetchProvider = async () => {
         const provider =  (await detectEthereumProvider()) as any
@@ -211,7 +209,8 @@ const Home: NextPage = () => {
 
     if (!provider) {
       console.log(connection)
-        return <div>Looding..</div>
+      console.log(greeting)
+      return <div>Looding..</div>
     } 
   
     return (
