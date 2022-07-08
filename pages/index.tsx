@@ -42,6 +42,7 @@ const Home: NextPage = () => {
         const { pathname } = Router;
         if (pathname === '/') {
           Router.push('/recovery');
+          console.log(redirctTo)
         }
       }
     })();
